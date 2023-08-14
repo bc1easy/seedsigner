@@ -1310,8 +1310,8 @@ class TopNav(BaseComponent):
             self.right_button = IconButton(
                 icon_name=SeedSignerIconConstants.POWER,
                 icon_size=GUIConstants.ICON_INLINE_FONT_SIZE,
-                screen_x=self.width - GUIConstants.TOP_NAV_BUTTON_SIZE - GUIConstants.EDGE_PADDING,
-                screen_y=GUIConstants.EDGE_PADDING,
+                screen_x=self.width - GUIConstants.TOP_NAV_BUTTON_SIZE - GUIConstants.EDGE_PADDING + 1, # +1 horizontal padding nudge
+                screen_y=GUIConstants.EDGE_PADDING - 1, # -1 vertical padding nudge
                 width=GUIConstants.TOP_NAV_BUTTON_SIZE,
                 height=GUIConstants.TOP_NAV_BUTTON_SIZE,
             )
