@@ -26,10 +26,14 @@ class PSBTSelectSeedView(View):
         if not self.controller.psbt:
             # Shouldn't be able to get here
             raise Exception("No PSBT currently loaded")
-        
+
+        if self.controller.psbt_seed:
+             if PSBTParser.has_matching_input_fingerprint(psbt=self.controller.psbt, seed=self.controller.psbt_seed, network=self.settings.get_value(SettingsConstants.SETTING__NETWORK)):
+                 # skip the seed prompt if a seed was previous selected and has matching input fingerprint
+                 return Destination(PSBTOverviewView)
+
         seeds = self.controller.storage.seeds
         button_data = []
-
         for seed in seeds:
             button_str = seed.get_fingerprint(self.settings.get_value(SettingsConstants.SETTING__NETWORK))
             if not PSBTParser.has_matching_input_fingerprint(psbt=self.controller.psbt, seed=seed, network=self.settings.get_value(SettingsConstants.SETTING__NETWORK)):
@@ -41,11 +45,6 @@ class PSBTSelectSeedView(View):
         button_data.append(self.SCAN_SEED)
         button_data.append(self.TYPE_12WORD)
         button_data.append(self.TYPE_24WORD)
-
-        if self.controller.psbt_seed:
-             if PSBTParser.has_matching_input_fingerprint(psbt=self.controller.psbt, seed=self.controller.psbt_seed, network=self.settings.get_value(SettingsConstants.SETTING__NETWORK)):
-                 # skip the seed prompt if a seed was previous selected and has matching input fingerprint
-                 return Destination(PSBTOverviewView)
 
         selected_menu_num = self.run_screen(
             ButtonListScreen,
@@ -177,6 +176,8 @@ class PSBTUnsupportedScriptTypeWarningView(View):
             skip_current_view=True,  # Prevent going BACK to WarningViews
         )
 
+
+
 class PSBTNoChangeWarningView(View):
     def run(self):
         selected_menu_num = WarningScreen(
@@ -246,7 +247,7 @@ class PSBTAddressDetailsView(View):
 
         if not psbt_parser:
             # Should not be able to get here
-            return Destination(MainMenuView)
+            raise Exception("Routing error")
 
         title = "Will Send"
         if psbt_parser.num_destinations > 1:
@@ -268,18 +269,17 @@ class PSBTAddressDetailsView(View):
         if selected_menu_num == RET_CODE__BACK_BUTTON:
             return Destination(BackStackView)
 
+        if self.address_num < len(psbt_parser.destination_addresses) - 1:
+            # Show the next receive addr
+            return Destination(PSBTAddressDetailsView, view_args={"address_num": self.address_num + 1})
+
+        elif psbt_parser.change_amount > 0:
+            # Move on to display change
+            return Destination(PSBTChangeDetailsView, view_args={"change_address_num": 0})
+
         else:
-            if self.address_num < len(psbt_parser.destination_addresses) - 1:
-                # Show the next receive addr
-                return Destination(PSBTAddressDetailsView, view_args={"address_num": self.address_num + 1})
-
-            elif psbt_parser.change_amount > 0:
-                # Move on to display change
-                return Destination(PSBTChangeDetailsView, view_args={"change_address_num": 0})
-
-            else:
-                # There's no change output to verify. Move on to sign the PSBT.
-                return Destination(PSBTFinalizeView)
+            # There's no change output to verify. Move on to sign the PSBT.
+            return Destination(PSBTFinalizeView)
 
 
 
@@ -513,6 +513,8 @@ class PSBTSignedQRDisplayView(View):
 
 
 class PSBTSigningErrorView(View):
+    SELECT_DIFF_SEED = "Select Diff Seed"
+    
     def run(self):
         psbt_parser: PSBTParser = self.controller.psbt_parser
         if not psbt_parser:
@@ -520,15 +522,18 @@ class PSBTSigningErrorView(View):
             return Destination(MainMenuView)
 
         # Just a WarningScreen here; only use DireWarningScreen for true security risks.
-        selected_menu_num = WarningScreen(
+        selected_menu_num = self.run_screen(
+            WarningScreen,
             title="PSBT Error",
             status_icon_name=SeedSignerIconConstants.WARNING,
             status_headline="Signing Failed",
             text="Signing with this seed did not add a valid signature.",
-            button_data=["Select Diff Seed"],
-        ).display()
+            button_data=[self.SELECT_DIFF_SEED]
+        )
 
         if selected_menu_num == 0:
+            # clear seed selected for psbt signing since it did not add a valid signature
+            self.controller.psbt_seed = None
             return Destination(PSBTSelectSeedView, clear_history=True)
 
         if selected_menu_num == RET_CODE__BACK_BUTTON:

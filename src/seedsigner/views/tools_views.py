@@ -1,22 +1,24 @@
+from dataclasses import dataclass
 import hashlib
 import os
-
 import time
 
 from embit.descriptor import Descriptor
 from PIL import Image
 from PIL.ImageOps import autocontrast
+
 from seedsigner.controller import Controller
-from seedsigner.hardware.camera import Camera
 from seedsigner.gui.components import FontAwesomeIconConstants, GUIConstants, SeedSignerIconConstants
 from seedsigner.gui.screens import (RET_CODE__BACK_BUTTON, ButtonListScreen)
-from seedsigner.gui.screens.tools_screens import ToolsCalcFinalWordDoneScreen, ToolsCalcFinalWordFinalizePromptScreen, ToolsCalcFinalWordScreen, ToolsCoinFlipEntryScreen, ToolsDiceEntropyEntryScreen, ToolsImageEntropyFinalImageScreen, ToolsImageEntropyLivePreviewScreen, ToolsAddressExplorerAddressTypeScreen
+from seedsigner.gui.screens.tools_screens import (ToolsCalcFinalWordDoneScreen, ToolsCalcFinalWordFinalizePromptScreen,
+    ToolsCalcFinalWordScreen, ToolsCoinFlipEntryScreen, ToolsDiceEntropyEntryScreen, ToolsImageEntropyFinalImageScreen,
+    ToolsImageEntropyLivePreviewScreen, ToolsAddressExplorerAddressTypeScreen)
 from seedsigner.helpers import embit_utils, mnemonic_generation
 from seedsigner.models.encode_qr import EncodeQR
 from seedsigner.models.qr_type import QRType
 from seedsigner.models.seed import Seed
 from seedsigner.models.settings_definition import SettingsConstants
-from seedsigner.views.seed_views import SeedDiscardView, SeedFinalizeView, SeedMnemonicEntryView, SeedWordsWarningView, SeedExportXpubScriptTypeView
+from seedsigner.views.seed_views import SeedDiscardView, SeedFinalizeView, SeedMnemonicEntryView, SeedOptionsView, SeedWordsWarningView, SeedExportXpubScriptTypeView
 
 from .view import View, Destination, BackStackView
 
@@ -79,6 +81,7 @@ class ToolsImageEntropyLivePreviewView(View):
 class ToolsImageEntropyFinalImageView(View):
     def run(self):
         if not self.controller.image_entropy_final_image:
+            from seedsigner.hardware.camera import Camera
             # Take the final full-res image
             camera = Camera.get_instance()
             camera.start_single_frame_mode(resolution=(720, 480))
@@ -221,9 +224,7 @@ class ToolsDiceEntropyEntryView(View):
         if ret == RET_CODE__BACK_BUTTON:
             return Destination(BackStackView)
         
-        print(f"Dice rolls: {ret}")
         dice_seed_phrase = mnemonic_generation.generate_mnemonic_from_dice(ret)
-        print(f"""Mnemonic: "{dice_seed_phrase}" """)
 
         # Add the mnemonic as an in-memory Seed
         seed = Seed(dice_seed_phrase, wordlist_language_code=self.settings.get_value(SettingsConstants.SETTING__WORDLIST_LANGUAGE))
@@ -311,8 +312,7 @@ class ToolsCalcFinalWordFinalizePromptView(View):
 
 class ToolsCalcFinalWordCoinFlipsView(View):
     def run(self):
-        mnemonic = self.controller.storage.pending_mnemonic
-        mnemonic_length = len(mnemonic)
+        mnemonic_length = len(self.controller.storage.pending_mnemonic)
 
         if mnemonic_length == 12:
             total_flips = 7
@@ -327,68 +327,74 @@ class ToolsCalcFinalWordCoinFlipsView(View):
             return Destination(BackStackView)
         
         else:
-            print(ret_val)
-            binary_string = ret_val + "0" * (11 - total_flips)
-            wordlist_index = int(binary_string, 2)
-            wordlist = Seed.get_wordlist(self.controller.settings.get_value(SettingsConstants.SETTING__WORDLIST_LANGUAGE))
-            word = wordlist[wordlist_index]
-            self.controller.storage.update_pending_mnemonic(word, mnemonic_length - 1)
-
             return Destination(ToolsCalcFinalWordShowFinalWordView, view_args=dict(coin_flips=ret_val))
 
 
 
 class ToolsCalcFinalWordShowFinalWordView(View):
-    def __init__(self, coin_flips=None):
+    def __init__(self, coin_flips: str = None):
         super().__init__()
-        self.coin_flips = coin_flips
-
-
-    def run(self):
         # Construct the actual final word. The user's selected_final_word
         # contributes:
         #   * 3 bits to a 24-word seed (plus 8-bit checksum)
         #   * 7 bits to a 12-word seed (plus 4-bit checksum)
         from seedsigner.helpers import mnemonic_generation
 
-        mnemonic = self.controller.storage.pending_mnemonic
-        mnemonic_length = len(mnemonic)
         wordlist_language_code = self.settings.get_value(SettingsConstants.SETTING__WORDLIST_LANGUAGE)
         wordlist = Seed.get_wordlist(wordlist_language_code)
 
+        # Prep the user's selected word / coin flips and the actual final word for
+        # the display.
+        if coin_flips:
+            self.selected_final_word = None
+            self.selected_final_bits = coin_flips
+        else:
+            # Convert the user's final word selection into its binary index equivalent
+            self.selected_final_word = self.controller.storage.pending_mnemonic[-1]
+            self.selected_final_bits = format(wordlist.index(self.selected_final_word), '011b')
+
+        if coin_flips:
+            # fill the last bits (what will eventually be the checksum) with zeros
+            binary_string = coin_flips + "0" * (11 - len(coin_flips))
+
+            # retrieve the matching word for the resulting index
+            wordlist_index = int(binary_string, 2)
+            wordlist = Seed.get_wordlist(self.controller.settings.get_value(SettingsConstants.SETTING__WORDLIST_LANGUAGE))
+            word = wordlist[wordlist_index]
+
+            # update the pending mnemonic with our new "final" (pre-checksum) word
+            self.controller.storage.update_pending_mnemonic(word, -1)
+
+        # Now calculate the REAL final word (has a proper checksum)
         final_mnemonic = mnemonic_generation.calculate_checksum(
             mnemonic=self.controller.storage.pending_mnemonic,
             wordlist_language_code=wordlist_language_code,
         )
-        self.controller.storage.update_pending_mnemonic(final_mnemonic[-1], mnemonic_length - 1)
 
-        # Prep the user's selected word (if there was one) and the actual final word for
-        # the display.
-        if self.coin_flips:
-            selected_final_word = None
-            selected_final_bits = self.coin_flips
-        else:
-            # Convert the user's final word selection into its binary index equivalent
-            selected_final_word = mnemonic[-1]
-            selected_final_bits = format(wordlist.index(selected_final_word), '011b')
+        # Update our pending mnemonic with the real final word
+        self.controller.storage.update_pending_mnemonic(final_mnemonic[-1], -1)
+
+        mnemonic = self.controller.storage.pending_mnemonic
+        mnemonic_length = len(mnemonic)
 
         # And grab the actual final word's checksum bits
-        actual_final_word = self.controller.storage.pending_mnemonic[-1]
-        if mnemonic_length == 12:
-            checksum_bits = format(wordlist.index(actual_final_word), '011b')[-4:]
-        else:
-            checksum_bits = format(wordlist.index(actual_final_word), '011b')[-8:]
+        self.actual_final_word = self.controller.storage.pending_mnemonic[-1]
+        num_checksum_bits = 4 if mnemonic_length == 12 else 8
+        self.checksum_bits = format(wordlist.index(self.actual_final_word), '011b')[-num_checksum_bits:]
 
+
+    def run(self):
         NEXT = "Next"
         button_data = [NEXT]
-        selected_menu_num = ToolsCalcFinalWordScreen(
+        selected_menu_num = self.run_screen(
+            ToolsCalcFinalWordScreen,
             title="Final Word Calc",
             button_data=button_data,
-            selected_final_word=selected_final_word,
-            selected_final_bits=selected_final_bits,
-            checksum_bits=checksum_bits,
-            actual_final_word=actual_final_word,
-        ).display()
+            selected_final_word=self.selected_final_word,
+            selected_final_bits=self.selected_final_bits,
+            checksum_bits=self.checksum_bits,
+            actual_final_word=self.actual_final_word,
+        )
 
         if selected_menu_num == RET_CODE__BACK_BUTTON:
             return Destination(BackStackView)
@@ -560,6 +566,14 @@ class ToolsAddressExplorerAddressTypeView(View):
         )
 
         if selected_menu_num == RET_CODE__BACK_BUTTON:
+            # If we entered this flow via an already-loaded seed's SeedOptionsView, we
+            # need to clear the `resume_main_flow` so that we don't get stuck in a 
+            # SeedOptionsView redirect loop.
+            # TODO: Refactor to a cleaner `BackStack.get_previous_View_cls()`
+            if len(self.controller.back_stack) > 1 and self.controller.back_stack[-2].View_cls == SeedOptionsView:
+                # The BackStack has the current View on the top with the real "back" in second position.
+                self.controller.resume_main_flow = None
+                self.controller.address_explorer_data = None
             return Destination(BackStackView)
         
         elif button_data[selected_menu_num] in [self.RECEIVE, self.CHANGE]:

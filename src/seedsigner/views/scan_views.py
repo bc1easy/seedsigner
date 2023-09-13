@@ -7,7 +7,7 @@ from seedsigner.models.decode_qr import DecodeQR
 from seedsigner.models.seed import Seed
 from seedsigner.models.settings import SettingsConstants
 from seedsigner.views.settings_views import SettingsIngestSettingsQRView
-from seedsigner.views.view import BackStackView, ErrorView, MainMenuView, NotYetImplementedView, View, Destination
+from seedsigner.views.view import BackStackView, ErrorView, MainMenuView, NotYetImplementedView, OptionDisabledView, View, Destination
 
 
 
@@ -135,16 +135,31 @@ class ScanView(View):
                     }
                 )
             
+            elif self.decoder.is_sign_message:
+                from seedsigner.views.seed_views import SeedSignMessageStartView
+                qr_data = self.decoder.get_qr_data()
+
+                return Destination(
+                    SeedSignMessageStartView,
+                    view_args=dict(
+                        derivation_path=qr_data["derivation_path"],
+                        message=qr_data["message"],
+                    )
+                )
+            
             else:
                 return Destination(NotYetImplementedView)
 
         elif self.decoder.is_invalid:
+            # For now, don't even try to re-do the attempted operation, just reset and
+            # start everything over.
+            self.controller.resume_main_flow = None
             return Destination(ErrorView, view_args=dict(
                 title="Error",
                 status_headline="Unknown QR Type",
                 text="QRCode is invalid or is a data format not yet supported.",
-                button_text="Back",
-                next_destination=Destination(BackStackView, skip_current_view=True),
+                button_text="Done",
+                next_destination=Destination(MainMenuView, clear_history=True),
             ))
 
         return Destination(MainMenuView)
