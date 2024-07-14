@@ -552,7 +552,7 @@ class SeedWordsBackupTestPromptScreen(ButtonListScreen):
         super().__post_init__()
 
         self.components.append(TextArea(
-            text="Optionally verify that your mnemonic backup is correct.",
+            text="Do you want to verify that your mnemonic backup is correct?",
             screen_y=self.top_nav.height,
             is_text_centered=True,
         ))
@@ -1319,9 +1319,9 @@ class SeedTranscribeSeedQRConfirmQRPromptScreen(ButtonListScreen):
         super().__post_init__()
 
         self.components.append(TextArea(
-            text="Optionally scan your transcribed SeedQR to confirm that it reads back correctly.",
+            text="Do you want to scan your transcribed SeedQR to confirm that it reads back correctly?",
             screen_y=self.top_nav.height,
-            height=self.buttons[0].screen_y - self.top_nav.height,
+            is_text_centered=True,
         ))
 
 
@@ -1457,14 +1457,14 @@ class SeedAddressVerificationScreen(ButtonListScreen):
 @dataclass
 class LoadMultisigWalletDescriptorScreen(ButtonListScreen):
     def __post_init__(self):
-        self.title = "Multisig Verification"
+        self.title = "Verify Descriptor?"
         self.is_bottom_list = True
         super().__post_init__()
 
         self.components.append(TextArea(
-            text="Load your multisig wallet descriptor to verify your receive/self-transfer or change address.",
+            text="Do you want to scan your multisig wallet descriptor to verify your address?",
             screen_y=self.top_nav.height,
-            height=self.buttons[0].screen_y - self.top_nav.height,
+            is_text_centered=True,
         ))
 
 

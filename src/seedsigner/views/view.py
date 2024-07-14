@@ -289,17 +289,16 @@ class PowerOffView(View):
 
 @dataclass
 class NotYetImplementedView(View):
-    text: str = "This is still on our to-do list!"
+    text: str = "This feature is not yet implemented and is on our roadmap."
     """
         Temporary View to use during dev.
     """
     def run(self):
         self.run_screen(
-            WarningScreen,
-            title="Work In Progress",
-            status_headline="Not Yet Implemented",
+            InfoScreen,
+            title="Not Implemented",
             text=self.text,
-            button_data=["Back to Main Menu"],
+            button_data=["Back to Home"],
         )
 
         return Destination(MainMenuView)

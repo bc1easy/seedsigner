@@ -1154,7 +1154,7 @@ class SeedWordsBackupTestPromptView(View):
 
 
     def run(self):
-        VERIFY = "Verify"
+        VERIFY = "Verify backup"
         SKIP = "Skip"
         button_data = [VERIFY, SKIP]
         selected_menu_num = seed_screens.SeedWordsBackupTestPromptScreen(
@@ -1493,12 +1493,12 @@ class SeedTranscribeSeedQRConfirmQRPromptView(View):
     
 
     def run(self):
-        SCAN = ("Confirm SeedQR", SeedSignerIconConstants.QRCODE)
-        DONE = "Done"
+        SCAN = ("Verify SeedQR", SeedSignerIconConstants.QRCODE)
+        DONE = "Skip"
         button_data = [SCAN, DONE]
 
         selected_menu_option = seed_screens.SeedTranscribeSeedQRConfirmQRPromptScreen(
-            title="Confirm SeedQR?",
+            title="Verify SeedQR?",
             button_data=button_data,
         ).display()
 
@@ -1877,8 +1877,8 @@ class AddressVerificationSuccessView(View):
 
 
 class LoadMultisigWalletDescriptorView(View):
-    SCAN = ("Scan Descriptor", SeedSignerIconConstants.QRCODE)
-    CANCEL = "Cancel"
+    SCAN = ("Verify descriptor", SeedSignerIconConstants.QRCODE)
+    CANCEL = "Skip"
 
     def run(self):
         button_data = [
