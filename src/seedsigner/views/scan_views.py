@@ -60,7 +60,7 @@ class ScanView(View):
                 # `seed__compactseedqr` as "seed: compactseedqr").
                 return Destination(ErrorView, view_args=dict(
                     title="Error",
-                    status_headline="Wrong QR Type",
+                    #status_headline="Wrong QR Type",
                     text=self.invalid_qr_type_message + f""", received "{self.decoder.qr_type.replace("__", ": ").replace("_", " ")}\" format""",
                     button_text="Back",
                     next_destination=Destination(BackStackView, skip_current_view=True),
@@ -160,7 +160,7 @@ class ScanView(View):
             self.controller.resume_main_flow = None
             return Destination(ErrorView, view_args=dict(
                 title="Error",
-                status_headline="Unknown QR Type",
+                #status_headline="Unknown QR Type",
                 text="QRCode is invalid or is a data format not yet supported.",
                 button_text="Done",
                 next_destination=Destination(MainMenuView, clear_history=True),

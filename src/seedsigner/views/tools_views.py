@@ -499,7 +499,7 @@ class ToolsAddressExplorerSelectSourceView(View):
             self.run_screen(
                     WarningScreen,
                     title="Electrum warning",
-                    status_headline=None,
+                    #status_headline=None,
                     text=f"Some features disabled for Electrum seeds",
                     show_back_button=False,
             )

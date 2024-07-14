@@ -82,7 +82,7 @@ class PSBTSelectSeedView(View):
             self.run_screen(
                     WarningScreen,
                     title="Electrum warning",
-                    status_headline=None,
+                    #status_headline=None,
                     text=f"Some features disabled for Electrum seeds",
                     show_back_button=False,
             )
@@ -176,7 +176,7 @@ class PSBTOverviewView(View):
 class PSBTUnsupportedScriptTypeWarningView(View):
     def run(self):
         selected_menu_num = WarningScreen(
-            status_headline="Unsupported Script Type!",
+            #status_headline="Unsupported Script Type!",
             text="PSBT has unsupported input script type, please verify your change addresses.",
             button_data=["Continue"],
         ).display()
@@ -196,7 +196,7 @@ class PSBTUnsupportedScriptTypeWarningView(View):
 class PSBTNoChangeWarningView(View):
     def run(self):
         selected_menu_num = WarningScreen(
-            status_headline="Full Spend!",
+            #status_headline="Full Spend!",
             text="This PSBT spends its entire input value. No change is coming back to your wallet.",
             button_data=["Continue"],
         ).display()
@@ -467,7 +467,7 @@ class PSBTAddressVerificationFailedView(View):
         
         DireWarningScreen(
             title=title,
-            status_headline="Address Verification Failed",
+            #status_headline="Address Verification Failed",
             text=text,
             button_data=["Discard PSBT"],
             show_back_button=False,
@@ -574,7 +574,7 @@ class PSBTSigningErrorView(View):
             WarningScreen,
             title="PSBT Error",
             status_icon_name=SeedSignerIconConstants.WARNING,
-            status_headline="Signing Failed",
+            #status_headline="Signing Failed",
             text="Signing with this seed did not add a valid signature.",
             button_data=[self.SELECT_DIFF_SEED]
         )

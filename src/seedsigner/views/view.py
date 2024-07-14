@@ -309,7 +309,7 @@ class NotYetImplementedView(View):
 class ErrorView(View):
     title: str = "Error"
     show_back_button: bool = True
-    status_headline: str = None
+    #status_headline: str = None
     text: str = None
     button_text: str = None
     next_destination: Destination = field(default_factory=lambda: Destination(MainMenuView, clear_history=True))
@@ -319,7 +319,7 @@ class ErrorView(View):
         self.run_screen(
             WarningScreen,
             title=self.title,
-            status_headline=self.status_headline,
+            #status_headline=self.status_headline,
             text=self.text,
             button_data=[self.button_text],
             show_back_button=self.show_back_button,
@@ -357,7 +357,7 @@ class UnhandledExceptionView(View):
         self.run_screen(
             DireWarningScreen,
             title="System Error",
-            status_headline=self.error[0],
+            #status_headline=self.error[0],
             text=self.error[1] + "\n" + self.error[2],
             button_data=["OK"],
             show_back_button=False,
@@ -385,7 +385,7 @@ class OptionDisabledView(View):
         selected_menu_num = self.run_screen(
             WarningScreen,
             title="Option Disabled",
-            status_headline=None,
+            #status_headline=None,
             text=self.error_msg,
             button_data=button_data,
             show_back_button=False,
@@ -413,7 +413,7 @@ class RemoveMicroSDWarningView(View):
             WarningScreen,
             title="Security Tip",
             status_icon_name=FontAwesomeIconConstants.SDCARD,
-            status_headline="",
+            #status_headline="",
             text="For maximum security,\nremove the MicroSD card\nbefore continuing.",
             show_back_button=False,
             button_data=["Continue"],

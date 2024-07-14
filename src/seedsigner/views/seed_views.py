@@ -161,7 +161,7 @@ class SeedSelectSeedView(View):
             self.run_screen(
                     WarningScreen,
                     title="Electrum warning",
-                    status_headline=None,
+                    #status_headline=None,
                     text=f"Some features disabled for Electrum seeds",
                     show_back_button=False,
             )
@@ -218,7 +218,7 @@ class LoadSeedView(View):
             self.run_screen(
                     WarningScreen,
                     title="Electrum warning",
-                    status_headline=None,
+                    #status_headline=None,
                     text=f"Some features disabled for Electrum seeds",
                     show_back_button=False,
             )
@@ -302,7 +302,7 @@ class SeedMnemonicInvalidView(View):
         selected_menu_num = self.run_screen(
             WarningScreen,
             title="Invalid Mnemonic!",
-            status_headline=None,
+            #status_headline=None,
             text=f"Checksum failure; not a valid seed phrase.",
             show_back_button=False,
             button_data=button_data,
@@ -432,7 +432,7 @@ class SeedDiscardView(View):
         selected_menu_num = self.run_screen(
             WarningScreen,
             title="Discard Seed?",
-            status_headline=None,
+            #status_headline=None,
             text=f"Wipe seed {fingerprint} from the device?",
             show_back_button=False,
             button_data=button_data,
@@ -804,7 +804,7 @@ class SeedExportXpubWarningView(View):
 
         selected_menu_num = self.run_screen(
             WarningScreen,
-            status_headline="Privacy Leak!",
+            #status_headline="Privacy Leak!",
             text="""Xpub can be used to view all future transactions.""",
         )
 
@@ -1127,7 +1127,7 @@ class SeedBIP85InvalidChildIndexView(View):
         DireWarningScreen(
             title="BIP-85 Index Error",
             show_back_button=False,
-            status_headline=f"Invalid Child Index",
+            #status_headline=f"Invalid Child Index",
             text=f"BIP-85 Child Index must be between 0 and {2**31-1}.",
             button_data=["Try Again"]
         ).display()
@@ -1267,7 +1267,7 @@ class SeedWordsBackupTestMistakeView(View):
         selected_menu_num = DireWarningScreen(
             title="Verification Error",
             show_back_button=False,
-            status_headline=f"Wrong Word!",
+            #status_headline=f"Wrong Word!",
             text=f"Word #{self.cur_index + 1} is not \"{self.wrong_word}\"!",
             button_data=button_data,
         ).display()
@@ -1300,7 +1300,7 @@ class SeedWordsBackupTestSuccessView(View):
         LargeIconStatusScreen(
             title="Backup Verified",
             show_back_button=False,
-            status_headline="Success!",
+            #status_headline="Success!",
             text="All mnemonic backup words were successfully verified!",
             button_data=["OK"]
         ).display()
@@ -1398,7 +1398,7 @@ class SeedTranscribeSeedQRWarningView(View):
             return destination
 
         selected_menu_num = DireWarningScreen(
-            status_headline="SeedQR is your private key!",
+            #status_headline="SeedQR is your private key!",
             text="""Never photograph or scan it into a device that connects to the internet.""",
         ).display()
 
@@ -1535,7 +1535,7 @@ class SeedTranscribeSeedQRConfirmScanView(View):
                 if seed_mnemonic != self.seed.mnemonic_list:
                     DireWarningScreen(
                         title="Confirm SeedQR",
-                        status_headline="Error!",
+                        #status_headline="Error!",
                         text="Your transcribed SeedQR does not match your original seed!",
                         show_back_button=False,
                         button_data=["Review SeedQR"],
@@ -1546,7 +1546,7 @@ class SeedTranscribeSeedQRConfirmScanView(View):
                 else:
                     LargeIconStatusScreen(
                         title="Confirm SeedQR",
-                        status_headline="Success!",
+                        #status_headline="Success!",
                         text="Your transcribed SeedQR successfully scanned and yielded the same seed.",
                         show_back_button=False,
                         button_data=["OK"],
@@ -1558,7 +1558,7 @@ class SeedTranscribeSeedQRConfirmScanView(View):
                 # Will this case ever happen? Will trigger if a different kind of QR code is scanned
                 DireWarningScreen(
                     title="Confirm SeedQR",
-                    status_headline="Error!",
+                    #status_headline="Error!",
                     text="Your transcribed SeedQR could not be read!",
                     show_back_button=False,
                     button_data=["Review SeedQR"],
@@ -1867,7 +1867,7 @@ class AddressVerificationSuccessView(View):
             source = f"seed {self.seed.get_fingerprint()}"
 
         LargeIconStatusScreen(
-            status_headline="Address Verified",
+            #status_headline="Address Verified",
             text=f"""{address[:7]} = {source}'s {"change" if verified_index_is_change else "receive"} address #{verified_index}.""",
             show_back_button=False,
         ).display()

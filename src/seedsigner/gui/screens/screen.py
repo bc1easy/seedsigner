@@ -857,7 +857,7 @@ class LargeIconStatusScreen(ButtonListScreen):
         self.status_icon.screen_x = int((self.canvas_width - self.status_icon.width) / 2)
         self.components.append(self.status_icon)
 
-        next_y = self.status_icon.screen_y + self.status_icon.height + GUIConstants.COMPONENT_PADDING
+        next_y = self.status_icon.screen_y + self.status_icon.height + int(GUIConstants.COMPONENT_PADDING)
         #next_y = self.status_icon.screen_y + self.status_icon.height + int(GUIConstants.COMPONENT_PADDING/2)
         #if self.status_headline:
         #    self.warning_headline_textarea = TextArea(
