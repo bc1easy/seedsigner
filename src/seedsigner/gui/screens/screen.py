@@ -831,11 +831,11 @@ class QRDisplayScreen(BaseScreen):
 
 @dataclass
 class LargeIconStatusScreen(ButtonListScreen):
-    title: str = "Dialog"
+    title: str = "Title"
     status_icon_name: str = None
     status_icon_size: int = GUIConstants.ICON_PRIMARY_SCREEN_SIZE
     status_color: str = GUIConstants.BODY_FONT_COLOR
-    #status_headline: str = "Success"  # The colored text under the large icon
+    status_headline: str = "Subhead"  # The colored text under the large icon
     text: str = ""                          # The body text of the screen
     text_edge_padding: int = GUIConstants.EDGE_PADDING
     button_data: list = None
@@ -858,17 +858,17 @@ class LargeIconStatusScreen(ButtonListScreen):
         self.components.append(self.status_icon)
 
         next_y = self.status_icon.screen_y + self.status_icon.height + int(GUIConstants.COMPONENT_PADDING)
-        #next_y = self.status_icon.screen_y + self.status_icon.height + int(GUIConstants.COMPONENT_PADDING/2)
-        #if self.status_headline:
-        #    self.warning_headline_textarea = TextArea(
-        #        text=self.status_headline,
-        #        width=self.canvas_width,
-        #        screen_y=next_y,
-        #        font_color=self.status_color,
-        #        allow_text_overflow=self.allow_text_overflow,
-        #    )
-        #    self.components.append(self.warning_headline_textarea)
-        #    next_y = next_y + self.warning_headline_textarea.height
+        next_y = self.status_icon.screen_y + self.status_icon.height + int(GUIConstants.COMPONENT_PADDING/2)
+        if self.status_headline:
+            self.warning_headline_textarea = TextArea(
+                text=self.status_headline,
+                width=self.canvas_width,
+                screen_y=next_y,
+                font_color=self.status_color,
+                allow_text_overflow=self.allow_text_overflow,
+            )
+            self.components.append(self.warning_headline_textarea)
+            next_y = next_y + self.warning_headline_textarea.height
 
         self.components.append(TextArea(
             height=self.buttons[0].screen_y - next_y,
@@ -886,7 +886,7 @@ class SuccessScreen(LargeIconStatusScreen):
     status_icon_name: str = SeedSignerIconConstants.SUCCESS
     status_icon_size: int = GUIConstants.ICON_PRIMARY_SCREEN_SIZE
     status_color: str = GUIConstants.SUCCESS_COLOR
-    #status_headline: str = "Success"
+    status_headline: str = "Success"
 
 
 @dataclass
@@ -895,7 +895,7 @@ class InfoScreen(LargeIconStatusScreen):
     status_icon_name: str = SeedSignerIconConstants.INFO
     status_icon_size: int = GUIConstants.ICON_PRIMARY_SCREEN_SIZE
     status_color: str = GUIConstants.INFO_COLOR
-    #status_headline: str = "Info"
+    status_headline: str = "Info"
 
 
 class WarningEdgesThread(BaseThread):
@@ -979,7 +979,7 @@ class WarningScreen(WarningEdgesMixin, LargeIconStatusScreen):
     title: str = "Warning"
     status_icon_name: str = SeedSignerIconConstants.WARNING
     status_color: str = "yellow"
-    #status_headline: str = "Warning"
+    status_headline: str = "Warning"
 
     def __post_init__(self):
         if not self.button_data:
@@ -993,7 +993,7 @@ class WarningScreen(WarningEdgesMixin, LargeIconStatusScreen):
 class DireWarningScreen(WarningScreen):
     title: str = "Dire Warning"
     status_color: str = GUIConstants.DIRE_WARNING_COLOR
-    #status_headline: str = "Dire Warning"
+    status_headline: str = "Dire Warning"
 
 
 @dataclass
@@ -1001,7 +1001,7 @@ class ErrorScreen(WarningScreen):
     title: str = "Error"
     status_icon_name: str = SeedSignerIconConstants.ERROR
     status_color: str = GUIConstants.ERROR_COLOR
-    #status_headline: str = "Error"
+    status_headline: str = "Error"
 
 
 @dataclass
